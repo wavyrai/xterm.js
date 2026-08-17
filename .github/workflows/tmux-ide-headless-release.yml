@@ -31,13 +31,14 @@ jobs:
           set -euo pipefail
           test "$(git rev-parse f447274f430fd22513f6adbf9862d19524471c04^{tree})" = "62330f6674bf1548123f3e1fe3da17363cc96a13"
           git merge-base --is-ancestor f447274f430fd22513f6adbf9862d19524471c04 HEAD
-          test "${GITHUB_REF_NAME}" = "v6.0.0-tmuxide.1"
+          test "${GITHUB_REF_NAME}" = "v6.0.0-tmuxide.2"
           test "$(npm --version)" = "10.9.2"
 
       - name: Install from the upstream lockfile
         run: |
           npm ci --ignore-scripts
           npm run install:pinned-esbuild-binary
+          npm run install:pinned-node-pty-binary
 
       - name: Verify source, API, and scheduler behavior
         run: |
@@ -55,18 +56,18 @@ jobs:
           set -euo pipefail
           mkdir -p dist
           npm pack --json --pack-destination dist ./headless > dist/pack.json
-          node -e 'const p=require("./dist/pack.json")[0]; if(p.name!=="@tmux-ide/xterm-headless"||p.version!=="6.0.0-tmuxide.1") throw new Error("unexpected package identity")'
+          node -e 'const p=require("./dist/pack.json")[0]; if(p.name!=="@tmux-ide/xterm-headless"||p.version!=="6.0.0-tmuxide.2") throw new Error("unexpected package identity")'
           export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
           node bin/generate_headless_sbom.mjs \
-            dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz \
+            dist/tmux-ide-xterm-headless-6.0.0-tmuxide.2.tgz \
             dist/SBOM.spdx.json
-          sha256sum dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz dist/SBOM.spdx.json > dist/SHA256SUMS
+          sha256sum dist/tmux-ide-xterm-headless-6.0.0-tmuxide.2.tgz dist/SBOM.spdx.json > dist/SHA256SUMS
           test -z "$(git status --porcelain --untracked-files=no)"
 
       - name: Attest the package artifact
         uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be
         with:
-          subject-path: dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz
+          subject-path: dist/tmux-ide-xterm-headless-6.0.0-tmuxide.2.tgz
 
       - name: Publish the immutable versioned assets
         env:
@@ -75,9 +76,9 @@ jobs:
         run: |
           set -euo pipefail
           gh release create "${GITHUB_REF_NAME}" \
-            dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz \
+            dist/tmux-ide-xterm-headless-6.0.0-tmuxide.2.tgz \
             dist/SBOM.spdx.json \
             dist/SHA256SUMS \
             --verify-tag \
-            --title "@tmux-ide/xterm-headless 6.0.0-tmuxide.1" \
+            --title "@tmux-ide/xterm-headless 6.0.0-tmuxide.2" \
             --notes "Pinned xterm.js headless 6.0.0 fork adding the proposed one-shot prioritizeNextWrite API."

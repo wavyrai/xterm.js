@@ -15,19 +15,19 @@ const xtermPackageJson = require('../package.json');
 const xtermHeadlessPackageJson = {
   ...xtermPackageJson,
   name: '@tmux-ide/xterm-headless',
-  version: '6.0.0-tmuxide.1',
+  version: '6.0.0-tmuxide.2',
   description: 'tmux-ide pinned xterm.js headless fork with one-shot interactive write priority',
   repository: {
     type: 'git',
     url: 'git+https://github.com/wavyrai/xterm.js.git',
     directory: 'headless'
   },
-  homepage: 'https://github.com/wavyrai/xterm.js/tree/v6.0.0-tmuxide.1/headless',
+  homepage: 'https://github.com/wavyrai/xterm.js/tree/v6.0.0-tmuxide.2/headless',
   bugs: { url: 'https://github.com/wavyrai/xterm.js/issues' },
   tmuxIdeFork: {
     upstreamCommit: 'f447274f430fd22513f6adbf9862d19524471c04',
     upstreamTree: '62330f6674bf1548123f3e1fe3da17363cc96a13',
-    releaseTag: 'v6.0.0-tmuxide.1',
+    releaseTag: 'v6.0.0-tmuxide.2',
     api: 'prioritize-next-write-v1'
   },
   main: 'lib-headless/xterm-headless.js',

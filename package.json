@@ -56,6 +56,7 @@
     "benchmark": "NODE_PATH=./out xterm-benchmark -r 5 -c test/benchmark/benchmark.json",
     "benchmark:prioritize-next-write": "npm run package-headless && node benchmark/prioritize-next-write.mjs",
     "install:pinned-esbuild-binary": "node bin/install_pinned_esbuild_binary.mjs",
+    "install:pinned-node-pty-binary": "node bin/install_pinned_node_pty_binary.mjs",
     "test:pack-headless": "node bin/test_headless_pack.mjs",
     "benchmark-baseline": "NODE_PATH=./out xterm-benchmark -r 5 -c test/benchmark/benchmark.json --baseline out-test/benchmark/*benchmark.js",
     "benchmark-eval": "NODE_PATH=./out xterm-benchmark -r 5 -c test/benchmark/benchmark.json --eval out-test/benchmark/*benchmark.js",

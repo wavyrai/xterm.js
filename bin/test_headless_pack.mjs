@@ -16,7 +16,7 @@ const consumerRoot = join(temporaryRoot, 'consumer');
 try {
   run('npm', ['run', 'package-headless'], repoRoot);
   const packed = JSON.parse(run('npm', ['pack', '--json', '--pack-destination', temporaryRoot, './headless'], repoRoot));
-  if (packed.length !== 1 || packed[0].name !== '@tmux-ide/xterm-headless' || packed[0].version !== '6.0.0-tmuxide.1') {
+  if (packed.length !== 1 || packed[0].name !== '@tmux-ide/xterm-headless' || packed[0].version !== '6.0.0-tmuxide.2') {
     throw new Error(`Unexpected pack result: ${JSON.stringify(packed)}`);
   }
   const tarball = join(temporaryRoot, packed[0].filename);

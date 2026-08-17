@@ -15,7 +15,7 @@ if (!tarballArgument || !outputArgument) {
 
 const repoRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const packageJson = JSON.parse(readFileSync(resolve(repoRoot, 'headless/package.json'), 'utf8'));
-if (packageJson.name !== '@tmux-ide/xterm-headless' || packageJson.version !== '6.0.0-tmuxide.1') {
+if (packageJson.name !== '@tmux-ide/xterm-headless' || packageJson.version !== '6.0.0-tmuxide.2') {
   throw new Error(`Unexpected package identity: ${packageJson.name}@${packageJson.version}`);
 }
 if (packageJson.license !== 'MIT' || Object.hasOwn(packageJson, 'dependencies')) {
@@ -29,11 +29,11 @@ if (!Number.isSafeInteger(sourceDateEpoch) || sourceDateEpoch <= 0) {
 const tarball = readFileSync(resolve(tarballArgument));
 const sha256 = createHash('sha256').update(tarball).digest('hex');
 const tag = packageJson.tmuxIdeFork?.releaseTag;
-if (tag !== 'v6.0.0-tmuxide.1') {
+if (tag !== 'v6.0.0-tmuxide.2') {
   throw new Error(`Unexpected release tag: ${tag}`);
 }
 
-const downloadLocation = `https://github.com/wavyrai/xterm.js/releases/download/${tag}/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz`;
+const downloadLocation = `https://github.com/wavyrai/xterm.js/releases/download/${tag}/tmux-ide-xterm-headless-6.0.0-tmuxide.2.tgz`;
 const document = {
   spdxVersion: 'SPDX-2.3',
   dataLicense: 'CC0-1.0',
@@ -61,7 +61,7 @@ const document = {
     externalRefs: [{
       referenceCategory: 'PACKAGE-MANAGER',
       referenceType: 'purl',
-      referenceLocator: 'pkg:npm/%40tmux-ide/xterm-headless@6.0.0-tmuxide.1'
+      referenceLocator: 'pkg:npm/%40tmux-ide/xterm-headless@6.0.0-tmuxide.2'
     }]
   }],
   relationships: [{
