@@ -23,6 +23,15 @@ describe('Headless API Tests', function (): void {
   it('Proposed API check', async () => {
     term = new Terminal({ allowProposedApi: false });
     throws(() => term.markers, (error: any) => error.message === 'You must set the allowProposedApi option to true to use proposed API');
+    throws(() => term.prioritizeNextWrite(), (error: any) => error.message === 'You must set the allowProposedApi option to true to use proposed API');
+  });
+
+  it('prioritizeNextWrite starts the next idle write before returning', () => {
+    let callback = false;
+    term.prioritizeNextWrite();
+    term.write('a', () => { callback = true; });
+    lineEquals(0, 'a');
+    strictEqual(callback, true);
   });
 
   it('write', async () => {

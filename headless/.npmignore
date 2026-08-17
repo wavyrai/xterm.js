@@ -1,6 +1,8 @@
 # Blacklist - exclude everything except npm defaults such as LICENSE, etc
 *
 !*/
+!FORK.md
+!THIRD_PARTY_NOTICES.md
 
 # Whitelist - lib-headless/
 !lib-headless/**/*.d.ts

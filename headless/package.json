@@ -1,16 +1,15 @@
 {
- "name": "@xterm/headless",
- "description": "A headless terminal component that runs in Node.js",
- "version": "5.5.0",
+ "name": "@tmux-ide/xterm-headless",
+ "description": "tmux-ide pinned xterm.js headless fork with one-shot interactive write priority",
+ "version": "6.0.0-tmuxide.1",
  "main": "lib-headless/xterm-headless.js",
  "module": "lib-headless/xterm-headless.mjs",
  "types": "typings/xterm-headless.d.ts",
- "exports": {
-  "types": "./typings/xterm-headless.d.ts",
-  "import": "./lib-headless/xterm-headless.mjs",
-  "require": "./lib-headless/xterm-headless.js"
+ "repository": {
+  "type": "git",
+  "url": "git+https://github.com/wavyrai/xterm.js.git",
+  "directory": "headless"
  },
- "repository": "https://github.com/xtermjs/xterm.js",
  "license": "MIT",
  "keywords": [
   "cli",
@@ -26,5 +25,22 @@
   "vt100",
   "webgl",
   "xterm"
- ]
+ ],
+ "homepage": "https://github.com/wavyrai/xterm.js/tree/v6.0.0-tmuxide.1/headless",
+ "bugs": {
+  "url": "https://github.com/wavyrai/xterm.js/issues"
+ },
+ "tmuxIdeFork": {
+  "upstreamCommit": "f447274f430fd22513f6adbf9862d19524471c04",
+  "upstreamTree": "62330f6674bf1548123f3e1fe3da17363cc96a13",
+  "releaseTag": "v6.0.0-tmuxide.1",
+  "api": "prioritize-next-write-v1"
+ },
+ "exports": {
+  ".": {
+   "types": "./typings/xterm-headless.d.ts",
+   "import": "./lib-headless/xterm-headless.mjs",
+   "require": "./lib-headless/xterm-headless.js"
+  }
+ }
 }

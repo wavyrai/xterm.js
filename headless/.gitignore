@@ -1,4 +1,7 @@
 lib-headless/
 typings/
 logo-full.png
+LICENSE
+FORK.md
+THIRD_PARTY_NOTICES.md
 ./package.json

@@ -27,6 +27,98 @@ describe('WriteBuffer', () => {
     wb = new WriteBuffer(data => { stack.push(data); });
   });
   describe('write input', () => {
+    it('keeps an idle write deferred by default', done => {
+      wb.write('a', () => {
+        assert.deepEqual(stack, ['a']);
+        done();
+      });
+      assert.deepEqual(stack, []);
+    });
+    it('prioritizes exactly the next idle write without reordering callbacks', done => {
+      wb.prioritizeNextWrite();
+      wb.write('a', () => { cbStack.push('a'); });
+      assert.deepEqual(stack, ['a']);
+      assert.deepEqual(cbStack, ['a']);
+      wb.write('b', () => {
+        assert.deepEqual(stack, ['a', 'b']);
+        assert.deepEqual(cbStack, ['a']);
+        done();
+      });
+      assert.deepEqual(stack, ['a']);
+    });
+    it('prioritizes a Uint8Array once and leaves the following idle write deferred', done => {
+      wb.prioritizeNextWrite();
+      wb.write(toBytes('a'), () => { cbStack.push('a'); });
+      assert.deepEqual(stack.map(value => typeof value === 'string' ? value : fromBytes(value)), ['a']);
+      assert.deepEqual(cbStack, ['a']);
+      wb.write(toBytes('b'), () => {
+        assert.deepEqual(stack.map(value => typeof value === 'string' ? value : fromBytes(value)), ['a', 'b']);
+        assert.deepEqual(cbStack, ['a']);
+        done();
+      });
+      assert.deepEqual(stack.map(value => typeof value === 'string' ? value : fromBytes(value)), ['a']);
+    });
+    it('does not arm priority while parser work is already queued', done => {
+      wb.write('a');
+      wb.prioritizeNextWrite();
+      wb.write('b', () => {
+        assert.deepEqual(stack, ['a', 'b']);
+        done();
+      });
+      assert.deepEqual(stack, []);
+    });
+    it('preserves async parser continuation and callback order', async () => {
+      let resume: ((value: boolean) => void) | undefined;
+      let firstPass = true;
+      wb = new WriteBuffer((data, promiseResult) => {
+        if (data === 'a' && firstPass) {
+          firstPass = false;
+          return new Promise<boolean>(resolve => { resume = resolve; });
+        }
+        assert.equal(promiseResult, true);
+        stack.push(data);
+      });
+      wb.prioritizeNextWrite();
+      wb.write('a', () => { cbStack.push('a'); });
+      wb.write('b', () => { cbStack.push('b'); });
+      assert.deepEqual(stack, []);
+      assert.deepEqual(cbStack, []);
+      resume!(true);
+      await new Promise<void>(resolve => setTimeout(resolve));
+      assert.deepEqual(stack, ['a', 'b']);
+      assert.deepEqual(cbStack, ['a', 'b']);
+    });
+    it('preserves callback-enqueued FIFO and the 12ms yield boundary', done => {
+      const originalNow = performance.now;
+      let nowCall = 0;
+      Object.defineProperty(performance, 'now', {
+        configurable: true,
+        value: () => [1, 14, 15, 16][Math.min(nowCall++, 3)]
+      });
+      wb.prioritizeNextWrite();
+      wb.write('a', () => {
+        cbStack.push('a');
+        wb.write('b', () => {
+          try {
+            cbStack.push('b');
+            assert.deepEqual(stack, ['a', 'b']);
+            assert.deepEqual(cbStack, ['a', 'b']);
+            done();
+          } finally {
+            Object.defineProperty(performance, 'now', { configurable: true, value: originalNow });
+          }
+        });
+      });
+      assert.deepEqual(stack, ['a']);
+      assert.deepEqual(cbStack, ['a']);
+    });
+    it('preserves the existing discard watermark while busy', () => {
+      const oversized = { length: 50000001 } as Uint8Array;
+      wb.write(oversized);
+      wb.prioritizeNextWrite();
+      assert.throws(() => wb.write('b'), 'write data discarded, use flow control to avoid losing data');
+      wb.writeSync('');
+    });
     it('string', done => {
       wb.write('a._');
       wb.write('b.x', () => { cbStack.push('b'); });

@@ -146,6 +146,10 @@ export abstract class CoreTerminal extends Disposable implements ICoreTerminal {
     this._writeBuffer.write(data, callback);
   }
 
+  public prioritizeNextWrite(): void {
+    this._writeBuffer.prioritizeNextWrite();
+  }
+
   /**
    * Write data to terminal synchonously.
    *

@@ -1,0 +1,83 @@
+name: tmux-ide headless release
+
+on:
+  push:
+    tags:
+      - "v6.0.0-tmuxide.*"
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out the tagged source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+
+      - name: Use the pinned Node toolchain
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.17.0
+          cache: npm
+
+      - name: Verify the fork base and tag
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse f447274f430fd22513f6adbf9862d19524471c04^{tree})" = "62330f6674bf1548123f3e1fe3da17363cc96a13"
+          git merge-base --is-ancestor f447274f430fd22513f6adbf9862d19524471c04 HEAD
+          test "${GITHUB_REF_NAME}" = "v6.0.0-tmuxide.1"
+          test "$(npm --version)" = "10.9.2"
+
+      - name: Install from the upstream lockfile
+        run: |
+          npm ci --ignore-scripts
+          npm run install:pinned-esbuild-binary
+
+      - name: Verify source, API, and scheduler behavior
+        run: |
+          npm run tsc
+          npm run lint-api
+          npm run lint -- --quiet
+          npm run esbuild
+          npm test
+          npm run test:pack-headless
+          npm run benchmark:prioritize-next-write
+
+      - name: Build the script-free npm tarball and SBOM
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          npm pack --json --pack-destination dist ./headless > dist/pack.json
+          node -e 'const p=require("./dist/pack.json")[0]; if(p.name!=="@tmux-ide/xterm-headless"||p.version!=="6.0.0-tmuxide.1") throw new Error("unexpected package identity")'
+          export SOURCE_DATE_EPOCH="$(git show -s --format=%ct HEAD)"
+          node bin/generate_headless_sbom.mjs \
+            dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz \
+            dist/SBOM.spdx.json
+          sha256sum dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz dist/SBOM.spdx.json > dist/SHA256SUMS
+          test -z "$(git status --porcelain --untracked-files=no)"
+
+      - name: Attest the package artifact
+        uses: actions/attest-build-provenance@e8998f949152b193b063cb0ec769d69d929409be
+        with:
+          subject-path: dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz
+
+      - name: Publish the immutable versioned assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "${GITHUB_REF_NAME}" \
+            dist/tmux-ide-xterm-headless-6.0.0-tmuxide.1.tgz \
+            dist/SBOM.spdx.json \
+            dist/SHA256SUMS \
+            --verify-tag \
+            --title "@tmux-ide/xterm-headless 6.0.0-tmuxide.1" \
+            --notes "Pinned xterm.js headless 6.0.0 fork adding the proposed one-shot prioritizeNextWrite API."

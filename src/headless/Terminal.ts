@@ -85,6 +85,10 @@ export class Terminal extends CoreTerminal {
     this.coreService.triggerDataEvent(data, wasUserInput);
   }
 
+  public prioritizeNextWrite(): void {
+    super.prioritizeNextWrite();
+  }
+
   /**
    * Resizes the terminal.
    *

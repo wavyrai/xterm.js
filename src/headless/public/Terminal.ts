@@ -139,6 +139,10 @@ export class Terminal extends Disposable implements ITerminalApi {
   public input(data: string, wasUserInput: boolean = true): void {
     this._core.input(data, wasUserInput);
   }
+  public prioritizeNextWrite(): void {
+    this._checkProposedApi();
+    this._core.prioritizeNextWrite();
+  }
   public resize(columns: number, rows: number): void {
     this._verifyIntegers(columns, rows);
     this._core.resize(columns, rows);

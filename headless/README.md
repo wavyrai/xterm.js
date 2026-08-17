@@ -1,31 +1,31 @@
-# [![xterm.js logo](logo-full.png)](https://xtermjs.org)
+# @tmux-ide/xterm-headless
 
-⚠ This package is experimental
-
-`xterm-headless` is a headless terminal that can be run in node.js. This is useful in combination with the frontend [`xterm`](https://www.npmjs.com/package/xterm) for example to keep track of a terminal's state on a remote server where the process is hosted.
-
-## Getting Started
-
-First, you need to install the module, we ship exclusively through npm, so you need that installed and then add xterm.js as a dependency by running:
+This is tmux-ide's pinned, source-built fork of the experimental xterm.js
+headless terminal package. It is based exactly on xterm.js commit
+`f447274f430fd22513f6adbf9862d19524471c04` (the source of
+`@xterm/headless@6.0.0`) and adds one proposed scheduling API.
 
 ```sh
-npm install xterm-headless
+npm install @tmux-ide/xterm-headless
 ```
 
-Then import as you would a regular node package. The recommended way to load `xterm-headless` is with TypeScript and the ES6 module syntax:
+```ts
+import { Terminal } from '@tmux-ide/xterm-headless';
 
-```javascript
-import { Terminal } from '@xterm/headless';
+const terminal = new Terminal({ allowProposedApi: true });
+terminal.prioritizeNextWrite();
+terminal.write(outputFromThePty);
 ```
 
-## API
+`prioritizeNextWrite()` affects exactly the next idle write. It bypasses only
+the initial deferred timer and emits no input. Parser order, asynchronous
+handler continuation, the 12 ms processing slices, callbacks, and flow control
+remain those of upstream xterm.js.
 
-The full API for `xterm-headless` is contained within the [TypeScript declaration file](https://github.com/xtermjs/xterm.js/blob/master/typings/xterm-headless.d.ts), use the branch/tag picker in GitHub (`w`) to navigate to the correct version of the API.
+The complete public surface is in
+[`typings/xterm-headless.d.ts`](typings/xterm-headless.d.ts). Proposed APIs
+require `allowProposedApi: true` and may change in a future fork release.
 
-Note that some APIs are marked *experimental*, these are added to enable experimentation with new ideas without committing to support it like a normal [semver](https://semver.org/) API. Note that these APIs can change radically between versions, so be sure to read release notes if you plan on using experimental APIs.
-
-### Addons
-
-Addons in `xterm-headless` work the [same as in `xterm`](https://github.com/xtermjs/xterm.js/blob/master/README.md#addons) with the one caveat being that the addon needs to be packaged for node.js and not use any DOM APIs.
-
-Currently no official addons are packaged on npm.
+See [`FORK.md`](FORK.md) for the exact patch contract and source provenance,
+and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) plus [`LICENSE`](LICENSE)
+for attribution. The upstream project is [xterm.js](https://github.com/xtermjs/xterm.js).

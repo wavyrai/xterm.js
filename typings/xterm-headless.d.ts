@@ -775,6 +775,14 @@ declare module '@xterm/headless' {
     input(data: string, wasUserInput?: boolean): void;
 
     /**
+     * (EXPERIMENTAL) Prioritize exactly the next write when the parser is
+     * idle. This changes scheduling only: it emits no input and preserves the
+     * normal asynchronous parser, callback, slicing and flow-control rules.
+     * Calls while parser work is already queued are a no-op.
+     */
+    prioritizeNextWrite(): void;
+
+    /**
      * Resizes the terminal. It's best practice to debounce calls to resize,
      * this will help ensure that the pty can respond to the resize event
      * before another one occurs.
@@ -880,7 +888,7 @@ declare module '@xterm/headless' {
     /**
      * This is called when the addon is activated.
      */
-    activate(terminal: Terminal): void;
+    activate(terminal: Omit<Terminal, 'prioritizeNextWrite'>): void;
   }
 
   /**

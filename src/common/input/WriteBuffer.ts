@@ -42,6 +42,7 @@ export class WriteBuffer extends Disposable {
   private _isSyncWriting = false;
   private _syncCalls = 0;
   private _didUserInput = false;
+  private _prioritizeNextWrite = false;
 
   private readonly _onWriteParsed = this._register(new Emitter<void>());
   public readonly onWriteParsed = this._onWriteParsed.event;
@@ -52,6 +53,20 @@ export class WriteBuffer extends Disposable {
 
   public handleUserInput(): void {
     this._didUserInput = true;
+  }
+
+  /**
+   * Prioritize exactly the next write when the buffer is idle.
+   *
+   * Headless embedders can use this when an external input authority has
+   * accepted real user input but the terminal parser is intentionally not the
+   * input transport. Calls made while work is already queued are a no-op: an
+   * existing parse must never be re-entered or reordered.
+   */
+  public prioritizeNextWrite(): void {
+    if (this._writeBuffer.length === 0) {
+      this._prioritizeNextWrite = true;
+    }
   }
 
   /**
@@ -112,8 +127,9 @@ export class WriteBuffer extends Disposable {
       // If this is the first write call after the user has done some input,
       // parse it immediately to minimize input latency,
       // otherwise schedule for the next event
-      if (this._didUserInput) {
+      if (this._didUserInput || this._prioritizeNextWrite) {
         this._didUserInput = false;
+        this._prioritizeNextWrite = false;
         this._pendingData += data.length;
         this._writeBuffer.push(data);
         this._callbacks.push(callback);
